@@ -7,7 +7,7 @@ import { ReceiptScanner } from '@/components/receipt-scanner'
 import { ItemReviewTable } from '@/components/item-review-table'
 import { createClient } from '@/lib/supabase/client'
 import type { BudgetCategory, ScannedItem, ScanResult } from '@/types/database'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, PenLine } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -37,6 +37,15 @@ export default function ScanPage() {
 
   useEffect(() => { loadCategories() }, [loadCategories])
 
+  function handleAddManually() {
+    setImageUrl('')
+    setStoreName('')
+    setReceiptDate(new Date().toISOString().slice(0, 10))
+    setItems([])
+    setError(null)
+    setStep('review')
+  }
+
   async function handleScan(file: File) {
     setScanning(true)
     setError(null)
@@ -51,8 +60,6 @@ export default function ScanPage() {
       setStoreName(data.store_name ?? '')
       setReceiptDate(data.receipt_date ?? new Date().toISOString().slice(0, 10))
 
-      // Immediately resolve suggested_category names → real category UUIDs
-      // so the dropdown shows "Groceries" not a UUID or blank
       const matched = data.items.map((item: ScannedItem) => {
         const cat = categories.find(
           c => c.name.toLowerCase() === item.suggested_category.toLowerCase()
@@ -87,6 +94,15 @@ export default function ScanPage() {
     }
   }
 
+  function handleReset() {
+    setStep('upload')
+    setItems([])
+    setImageUrl('')
+    setStoreName('')
+    setReceiptDate(new Date().toISOString().slice(0, 10))
+    setError(null)
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto w-full space-y-4">
       <h1 className="text-xl font-bold">
@@ -100,7 +116,25 @@ export default function ScanPage() {
       )}
 
       {step === 'upload' && (
-        <ReceiptScanner onScan={handleScan} loading={scanning} />
+        <div className="space-y-4">
+          <ReceiptScanner onScan={handleScan} loading={scanning} />
+
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={handleAddManually}
+            disabled={scanning}
+          >
+            <PenLine className="h-4 w-4" />
+            Add manually
+          </Button>
+        </div>
       )}
 
       {step === 'review' && (
@@ -126,7 +160,7 @@ export default function ScanPage() {
             <Link href="/dashboard" className={buttonVariants({})}>
               View Dashboard
             </Link>
-            <Button variant="outline" onClick={() => { setStep('upload'); setItems([]); setError(null) }}>
+            <Button variant="outline" onClick={handleReset}>
               Scan Another
             </Button>
           </div>
