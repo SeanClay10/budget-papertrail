@@ -1,91 +1,99 @@
-# AI Receipt Budget Tracker
+# Budget Papertrail
 
-Scan store receipts with your phone camera, let Claude Vision AI categorize every line item, and track spending against your monthly budgets — all in a mobile-first web app.
+A mobile-first budgeting app that uses AI to scan and categorize store receipts. Photograph a receipt, review the AI-parsed line items, assign categories, and watch your monthly budget update in real time.
 
-## Stack
-
-- **Next.js 16** (App Router, Turbopack)
-- **Supabase** — Auth, PostgreSQL, Storage
-- **Claude Vision API** (`claude-sonnet-4-6`) — Receipt OCR + categorization
-- **shadcn/ui v4** + Tailwind CSS
-- **Recharts** — Budget charts
+**Live:** https://budget-papertrail.vercel.app
 
 ---
 
-## Setup (do this before running)
+## Features
 
-### 1. Supabase Project
+- 📸 **Scan receipts** — take a photo directly from your phone or upload from your desktop
+- 🤖 **AI categorization** — Claude Vision reads each line item and suggests a budget category
+- ✏️ **Review before saving** — edit item names, prices, and categories before anything hits your budget
+- 📊 **Monthly dashboard** — progress bars per category, donut chart breakdown, navigate between months
+- 🗂️ **Receipt history** — view, edit, or delete past receipts with full line-item detail
+- ⚙️ **Custom categories** — create your own categories with custom icons, colors, and monthly limits
+- 🌙 **Dark mode** — follows your system preference, toggleable manually
+- 📱 **PWA** — installable to your phone home screen
+
+---
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Styling | Tailwind CSS + shadcn/ui v4 |
+| Database + Auth | Supabase |
+| File Storage | Supabase Storage |
+| Receipt OCR | Claude Vision API (`claude-sonnet-4-6`) |
+| Charts | Recharts |
+| Hosting | Vercel |
+
+---
+
+## Local Development
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/SeanClay10/budget-papertrail.git
+cd budget-papertrail
+npm install
+```
+
+### 2. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** → paste the contents of `supabase-setup.sql` → **Run**
-3. Go to **Storage** → confirm the `receipts` bucket was created (private). If not, create it manually.
-4. Go to **Project Settings → API** and copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon/public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
+2. Run `supabase-setup.sql` in the Supabase SQL Editor
+3. Go to **Authentication → Providers → Email** → enable the Email provider, disable Sign Ups
+4. Go to **Authentication → URL Configuration** → add `http://localhost:3000/auth/callback` to Redirect URLs
 
-### 2. Anthropic API Key
+### 3. Environment variables
 
-Get a key at [console.anthropic.com](https://console.anthropic.com) → `ANTHROPIC_API_KEY`
-
-### 3. Fill `.env.local`
+Create `.env.local` in the project root:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
-ANTHROPIC_API_KEY=sk-ant-...
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
 ### 4. Run
 
 ```bash
-npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — redirects to `/login`.
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Usage
+## Deployment
 
-1. **Sign up** → default budget categories seeded automatically
-2. **Settings** → adjust monthly limits or add custom categories
-3. **Scan** → take a photo of a receipt (or upload from gallery on desktop)
-4. **Review** → edit any mis-read items or wrong categories → **Save to Budget**
-5. **Dashboard** → spending per category with progress bars + donut chart
+Hosted on Vercel. Every push to `master` triggers an automatic redeployment.
 
-### Mobile
-Open in phone browser → tap **Scan** → native camera opens. Install as a home screen app via browser menu → "Add to Home Screen".
+To deploy your own instance:
+1. Import the repo into [Vercel](https://vercel.com)
+2. Add the four environment variables in the Vercel dashboard
+3. Add your Vercel URL to Supabase's redirect allowlist: `https://your-app.vercel.app/auth/callback`
 
 ---
 
-## Project Structure
+## Access
 
-```
-src/
-├── app/
-│   ├── (auth)/login, signup      — auth pages (Supabase Auth)
-│   ├── (app)/dashboard           — budget overview (server component)
-│   ├── (app)/scan                — camera → review → save flow
-│   ├── (app)/receipts            — receipt history
-│   ├── (app)/settings            — manage categories
-│   └── api/scan, receipts, seed-categories
-├── components/
-│   ├── receipt-scanner.tsx       — camera / file upload / drag-drop
-│   ├── item-review-table.tsx     — editable parsed items with category dropdowns
-│   ├── budget-card.tsx           — progress bar card per category
-│   ├── spending-chart.tsx        — Recharts donut chart
-│   ├── category-form.tsx         — create/edit category dialog
-│   └── nav.tsx                   — bottom nav (mobile) + sidebar (desktop)
-└── lib/supabase/, lib/anthropic.ts
-```
+Sign up is disabled — accounts are created manually via the Supabase dashboard under **Authentication → Users → Add User**.
 
-## Supabase Tables
+---
+
+## Database Schema
 
 | Table | Purpose |
 |---|---|
-| `budget_categories` | User's categories with monthly limits |
+| `budget_categories` | User-defined categories with monthly limits |
 | `receipts` | One row per scanned receipt |
-| `receipt_items` | Line items linked to receipts + categories |
+| `receipt_items` | Line items linked to receipts and categories |
+
+All tables have Row Level Security enabled — users can only access their own data.
