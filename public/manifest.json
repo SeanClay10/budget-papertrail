@@ -1,0 +1,10 @@
+{
+  "name": "Budget Papertrail",
+  "short_name": "Papertrail",
+  "description": "Scan receipts and track your monthly budget with AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait"
+}
