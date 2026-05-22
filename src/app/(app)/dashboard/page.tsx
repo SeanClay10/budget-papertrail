@@ -3,12 +3,14 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { BudgetCard } from '@/components/budget-card'
 import { SpendingChart } from '@/components/spending-chart'
+import { SpendingHistoryChart } from '@/components/spending-history-chart'
+import type { HistoryDataPoint, HistoryCategory } from '@/components/spending-history-chart'
 import { MonthPicker } from '@/components/month-picker'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ScanLine, Receipt } from 'lucide-react'
-import { format, startOfMonth, endOfMonth, parseISO } from 'date-fns'
+import { format, startOfMonth, endOfMonth, parseISO, subMonths } from 'date-fns'
 import type { CategoryWithSpending } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -33,7 +35,6 @@ export default async function DashboardPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Parse month from URL param (YYYY-MM) or fall back to current month
   const now = new Date()
   const currentMonthStr = format(now, 'yyyy-MM')
   const selectedMonthStr = month && /^\d{4}-\d{2}$/.test(month) ? month : currentMonthStr
@@ -47,7 +48,6 @@ export default async function DashboardPage({
     .eq('user_id', user!.id)
     .order('name')
 
-  // Auto-seed default categories on first login (upsert = safe against concurrent calls)
   if (!categories || categories.length === 0) {
     await supabase.from('budget_categories').upsert(
       DEFAULT_CATEGORIES.map(c => ({ ...c, user_id: user!.id })),
@@ -60,7 +60,7 @@ export default async function DashboardPage({
       .order('name'))
   }
 
-  // Step 1: get receipt IDs for the selected month
+  // ── Selected month spending ──────────────────────────────────────────────
   const { data: monthReceipts } = await supabase
     .from('receipts')
     .select('id')
@@ -70,7 +70,6 @@ export default async function DashboardPage({
 
   const receiptIds = monthReceipts?.map(r => r.id) ?? []
 
-  // Step 2: sum line items for those receipts
   const { data: spending } = receiptIds.length > 0
     ? await supabase
         .from('receipt_items')
@@ -93,7 +92,6 @@ export default async function DashboardPage({
     spent: Math.round((spendingMap[c.id] ?? 0) * 100) / 100,
   }))
 
-  // Append a synthetic "Uncategorized" card if any items have no category
   if (uncategorizedTotal > 0) {
     categoriesWithSpending.push({
       id: '__uncategorized__',
@@ -110,6 +108,62 @@ export default async function DashboardPage({
   const totalSpent = Object.values(spendingMap).reduce((a, b) => a + b, 0) + uncategorizedTotal
   const totalBudget = (categories ?? []).reduce((a, c) => a + c.monthly_limit, 0)
 
+  // ── 6-month history ──────────────────────────────────────────────────────
+  const historyStart = startOfMonth(subMonths(now, 5)).toISOString().slice(0, 10)
+  const historyEnd = endOfMonth(now).toISOString().slice(0, 10)
+
+  const { data: historyReceipts } = await supabase
+    .from('receipts')
+    .select('id, receipt_date')
+    .eq('user_id', user!.id)
+    .gte('receipt_date', historyStart)
+    .lte('receipt_date', historyEnd)
+
+  const historyReceiptIds = historyReceipts?.map(r => r.id) ?? []
+
+  const { data: historyItems } = historyReceiptIds.length > 0
+    ? await supabase
+        .from('receipt_items')
+        .select('receipt_id, category_id, price')
+        .in('receipt_id', historyReceiptIds)
+    : { data: [] as { receipt_id: string; category_id: string | null; price: number }[] }
+
+  // Build receipt_id → receipt_date lookup
+  const receiptDateMap: Record<string, string> = {}
+  for (const r of historyReceipts ?? []) receiptDateMap[r.id] = r.receipt_date
+
+  // Accumulate spending per month per category
+  const historySpendingMap: Record<string, Record<string, number>> = {}
+  for (const item of historyItems ?? []) {
+    const date = receiptDateMap[item.receipt_id]
+    if (!date || !item.category_id) continue
+    const monthKey = date.slice(0, 7) // 'YYYY-MM'
+    if (!historySpendingMap[monthKey]) historySpendingMap[monthKey] = {}
+    historySpendingMap[monthKey][item.category_id] =
+      (historySpendingMap[monthKey][item.category_id] ?? 0) + Number(item.price)
+  }
+
+  // Build the last 6 month labels in order
+  const last6Months = Array.from({ length: 6 }, (_, i) =>
+    format(subMonths(now, 5 - i), 'yyyy-MM')
+  )
+
+  const historyChartData: HistoryDataPoint[] = last6Months.map(monthKey => {
+    const point: HistoryDataPoint = { month: format(parseISO(monthKey + '-01'), 'MMM yy') }
+    for (const cat of categories ?? []) {
+      point[cat.id] = Math.round((historySpendingMap[monthKey]?.[cat.id] ?? 0) * 100) / 100
+    }
+    return point
+  })
+
+  const historyCategories: HistoryCategory[] = (categories ?? []).map(c => ({
+    id: c.id,
+    name: c.name,
+    color: c.color,
+    icon: c.icon ?? '',
+  }))
+
+  // ── Recent receipts ──────────────────────────────────────────────────────
   const { data: recentReceipts } = await supabase
     .from('receipts')
     .select('*')
@@ -141,13 +195,26 @@ export default async function DashboardPage({
       {categoriesWithSpending.some(c => c.spent > 0) && (
         <Card>
           <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Spending Breakdown</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {format(selectedDate, 'MMMM yyyy')} Breakdown
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <SpendingChart categories={categoriesWithSpending} />
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader className="pb-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Spending History — Last 6 Months
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SpendingHistoryChart data={historyChartData} categories={historyCategories} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
