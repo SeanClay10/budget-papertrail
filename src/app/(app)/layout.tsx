@@ -1,6 +1,7 @@
 import { Nav } from '@/components/nav'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Receipt } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             backgroundSize: '20px 20px',
           }}
         >
-          <div className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary border-2 border-border">
               <Receipt className="h-4 w-4 text-white" strokeWidth={2.5} />
             </div>
@@ -23,7 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="font-heading font-extrabold text-base text-primary">Budget</span>
               <span className="font-heading font-bold text-base text-foreground"> Papertrail</span>
             </div>
-          </div>
+          </Link>
           <ThemeToggle />
         </header>
 

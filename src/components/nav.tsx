@@ -30,7 +30,7 @@ export function Nav() {
       {/* ── Desktop Sidebar ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-64 min-h-screen border-r-2 border-border bg-card px-4 py-6">
         {/* Wordmark */}
-        <div className="flex items-center gap-3 px-2 mb-8">
+        <Link href="/dashboard" className="flex items-center gap-3 px-2 mb-8">
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary border-2 border-border shadow-[var(--shadow-hard-sm)] hover-wiggle">
             <Receipt className="h-5 w-5 text-white" strokeWidth={2.5} />
           </div>
@@ -38,7 +38,7 @@ export function Nav() {
             <span className="font-heading font-extrabold text-xl text-primary">Budget</span>
             <span className="font-heading font-bold text-xl text-foreground"> Papertrail</span>
           </div>
-        </div>
+        </Link>
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1.5">
