@@ -24,30 +24,46 @@ export function MonthPicker({ currentMonth }: MonthPickerProps) {
     router.push(`/dashboard?${params.toString()}`)
   }
 
+  const circleBtn = [
+    'flex items-center justify-center w-10 h-10 rounded-full',
+    'border-2 border-border bg-card text-foreground',
+    'shadow-[var(--shadow-hard-sm)]',
+    'transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+    'hover:bg-[var(--tertiary)] hover:text-[var(--tertiary-foreground)]',
+    'active:shadow-none active:translate-x-[1px] active:translate-y-[1px]',
+    'disabled:opacity-30 disabled:pointer-events-none',
+  ].join(' ')
+
   return (
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => navigate(prevMonth)}
-        className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-        aria-label="Previous month"
-      >
-        <ChevronLeft className="h-4 w-4" />
+    <div className="flex items-center gap-2">
+      <button onClick={() => navigate(prevMonth)} className={circleBtn} aria-label="Previous month">
+        <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
       </button>
-      <span className="text-xl font-bold min-w-[160px] text-center">
+
+      <span className="font-heading font-extrabold text-2xl min-w-[180px] text-center">
         {format(date, 'MMMM yyyy')}
       </span>
+
       <button
         onClick={() => navigate(nextMonth)}
         disabled={nextIsFuture}
-        className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
+        className={circleBtn}
         aria-label="Next month"
       >
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
       </button>
+
       {!isCurrentMonth && (
         <button
           onClick={() => navigate(format(new Date(), 'yyyy-MM'))}
-          className="ml-1 text-xs text-primary underline-offset-4 hover:underline"
+          className={[
+            'ml-1 px-3 py-1 rounded-full text-xs font-heading font-bold',
+            'bg-[var(--tertiary)] text-[var(--tertiary-foreground)]',
+            'border-2 border-border shadow-[var(--shadow-hard-sm)]',
+            'transition-all duration-200',
+            'hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_var(--border)]',
+            'active:translate-x-[1px] active:translate-y-[1px] active:shadow-none',
+          ].join(' ')}
         >
           Today
         </button>
