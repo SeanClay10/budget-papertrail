@@ -69,7 +69,7 @@ export function SpendingHistoryChart({ data, categories }: SpendingHistoryChartP
             return [`$${Number(value ?? 0).toFixed(2)}`, cat ? `${cat.icon} ${cat.name}` : nameStr]
           }}
           contentStyle={{ fontSize: 12 }}
-          cursor={{ fill: 'hsl(var(--muted))' }}
+          cursor={{ fill: 'rgba(0,0,0,0.04)' }}
         />
         <Legend
           formatter={(value: string) => {
