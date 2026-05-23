@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Camera, Upload, X } from 'lucide-react'
+import { Camera, Upload, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ReceiptScannerProps {
@@ -64,89 +64,86 @@ export function ReceiptScanner({ onScan, loading }: ReceiptScannerProps) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handleScan = () => {
-    if (selectedFile) onScan(selectedFile)
-  }
-
   return (
     <div className="space-y-4">
-      {/* Hidden inputs */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleInputChange}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleInputChange}
-      />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleInputChange} />
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleInputChange} />
 
       {!preview ? (
         <>
-          {/* Camera button — prominent on mobile */}
-          <Button
-            size="lg"
-            className="w-full h-16 text-base gap-3"
+          {/* Camera — primary action */}
+          <button
             onClick={() => cameraInputRef.current?.click()}
             disabled={loading}
+            className={cn(
+              'w-full h-20 flex items-center justify-center gap-3 rounded-2xl',
+              'bg-primary text-white font-heading font-bold text-lg',
+              'border-2 border-border shadow-[5px_5px_0px_0px_var(--border)]',
+              'transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+              'hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_var(--border)]',
+              'active:translate-x-[1px] active:translate-y-[1px] active:shadow-[3px_3px_0px_0px_var(--border)]',
+              'disabled:opacity-50 disabled:pointer-events-none',
+            )}
           >
-            <Camera className="h-6 w-6" />
+            <Camera className="h-7 w-7" strokeWidth={2.5} />
             Take Photo
-          </Button>
+          </button>
 
-          {/* Drop zone / file upload */}
+          {/* Drop zone */}
           <div
             className={cn(
-              'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
-              dragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30'
+              'flex flex-col items-center justify-center gap-2 p-8 rounded-2xl cursor-pointer',
+              'border-2 border-dashed transition-all duration-200',
+              dragging
+                ? 'border-primary bg-accent text-primary border-solid'
+                : 'border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-accent/30'
             )}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
           >
-            <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm font-medium">Upload from gallery</p>
-            <p className="text-xs text-muted-foreground mt-1">or drag & drop an image here</p>
+            <Upload className="h-8 w-8" strokeWidth={2} />
+            <p className="font-heading font-bold text-sm">Upload from gallery</p>
+            <p className="text-xs">or drag & drop an image here</p>
           </div>
         </>
       ) : (
         <div className="space-y-3">
-          <div className="relative rounded-xl overflow-hidden border">
+          {/* Preview */}
+          <div className="relative rounded-2xl overflow-hidden border-2 border-border shadow-[5px_5px_0px_0px_var(--border)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Receipt preview" className="w-full max-h-96 object-contain bg-muted" />
             <button
               onClick={clearPreview}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+              className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-foreground/80 text-background border-2 border-border hover:bg-foreground transition-colors"
               aria-label="Remove image"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
-          <Button
-            size="lg"
-            className="w-full gap-2"
-            onClick={handleScan}
+
+          {/* Scan button */}
+          <button
+            onClick={() => selectedFile && onScan(selectedFile)}
             disabled={loading}
+            className={cn(
+              'w-full h-14 flex items-center justify-center gap-3 rounded-2xl',
+              'bg-primary text-white font-heading font-bold text-base',
+              'border-2 border-border shadow-[5px_5px_0px_0px_var(--border)]',
+              'transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+              'hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_var(--border)]',
+              'active:translate-x-[1px] active:translate-y-[1px] active:shadow-[3px_3px_0px_0px_var(--border)]',
+              'disabled:opacity-50 disabled:pointer-events-none',
+            )}
           >
             {loading ? (
-              <>
-                <span className="animate-spin">⟳</span>
-                Scanning receipt…
-              </>
+              <><Loader2 className="h-5 w-5 animate-spin" /> Scanning receipt…</>
             ) : (
-              <>
-                <Camera className="h-5 w-5" />
-                Scan Receipt
-              </>
+              <><Camera className="h-5 w-5" strokeWidth={2.5} /> Scan Receipt</>
             )}
-          </Button>
+          </button>
+
           <Button variant="outline" className="w-full" onClick={clearPreview} disabled={loading}>
             Choose Different Image
           </Button>
