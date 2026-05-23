@@ -6,28 +6,35 @@ A mobile-first budgeting app that uses AI to read and categorize store receipts.
 
 ---
 
-## Screenshots
+## UI
 
-### Login
-<img src="public/screenshots/login.png" alt="Login page" width="420" />
+<p align="center">
+  <img src="public/screenshots/login.png" alt="Login page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Dashboard
-<img src="public/screenshots/dashboard.png" alt="Budget dashboard" width="900" />
+<p align="center">
+  <img src="public/screenshots/dashboard.png" alt="Budget dashboard" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Dashboard — Dark Mode
-<img src="public/screenshots/dark-mode.png" alt="Dashboard in dark mode" width="900" />
+<p align="center">
+  <img src="public/screenshots/dark-mode.png" alt="Dashboard in dark mode" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Scan a Receipt
-<img src="public/screenshots/scan.png" alt="Scan receipt page" width="420" />
+<p align="center">
+  <img src="public/screenshots/scan.png" alt="Scan receipt page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Review & Edit Items
-<img src="public/screenshots/review.png" alt="Item review table" width="600" />
+<p align="center">
+  <img src="public/screenshots/review.png" alt="Item review table" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Receipt History
-<img src="public/screenshots/receipts.png" alt="Receipts history page" width="900" />
+<p align="center">
+  <img src="public/screenshots/receipts.png" alt="Receipts history page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
-### Budget Categories
-<img src="public/screenshots/settings.png" alt="Settings — budget categories" width="600" />
+<p align="center">
+  <img src="public/screenshots/settings.png" alt="Budget categories settings" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+</p>
 
 ---
 
