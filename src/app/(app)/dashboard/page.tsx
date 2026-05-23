@@ -7,7 +7,7 @@ import { SpendingHistoryChart } from '@/components/spending-history-chart'
 import type { HistoryDataPoint, HistoryCategory } from '@/components/spending-history-chart'
 import { MonthPicker } from '@/components/month-picker'
 import { buttonVariants } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { ScanLine, Receipt } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, parseISO, subMonths } from 'date-fns'
@@ -171,84 +171,104 @@ export default async function DashboardPage({
     .order('receipt_date', { ascending: false })
     .limit(5)
 
+  // Section title helper
+  function SectionTitle({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="space-y-1.5">
+        <h2 className="font-heading font-bold text-lg">{children}</h2>
+        <div className="w-6 h-1 rounded-full bg-primary" />
+      </div>
+    )
+  }
+
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto w-full">
+    <div className="p-4 md:p-6 space-y-7 max-w-4xl mx-auto w-full">
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           <MonthPicker currentMonth={selectedMonthStr} />
-          <p className="text-sm text-muted-foreground">
-            ${totalSpent.toFixed(2)} of ${totalBudget.toFixed(2)} spent
+          <p className="text-sm text-muted-foreground pl-1">
+            <span className="font-heading font-bold text-primary">${totalSpent.toFixed(2)}</span>
+            {' '}of ${totalBudget.toFixed(2)} spent
           </p>
         </div>
         <Link href="/scan" className={cn(buttonVariants({ size: 'sm' }), 'gap-1.5')}>
-          <ScanLine className="h-4 w-4" />
+          <ScanLine className="h-4 w-4" strokeWidth={2.5} />
           Scan Receipt
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Budget cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {categoriesWithSpending.map(cat => (
           <BudgetCard key={cat.id} category={cat} />
         ))}
       </div>
 
+      {/* Donut breakdown */}
       {categoriesWithSpending.some(c => c.spent > 0) && (
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {format(selectedDate, 'MMMM yyyy')} Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SpendingChart categories={categoriesWithSpending} />
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <SectionTitle>{format(selectedDate, 'MMMM yyyy')} Breakdown</SectionTitle>
+          <Card>
+            <CardContent className="py-4">
+              <SpendingChart categories={categoriesWithSpending} />
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      <Card>
-        <CardHeader className="pb-0">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Spending History — Last 6 Months
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SpendingHistoryChart data={historyChartData} categories={historyCategories} />
-        </CardContent>
-      </Card>
+      {/* History chart */}
+      <div className="space-y-3">
+        <SectionTitle>Spending History</SectionTitle>
+        <Card>
+          <CardContent className="py-4">
+            <SpendingHistoryChart data={historyChartData} categories={historyCategories} />
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-medium">Recent Receipts</CardTitle>
+      {/* Recent receipts */}
+      <div className="space-y-3">
+        <div className="flex items-end justify-between">
+          <SectionTitle>Recent Receipts</SectionTitle>
           <Link href="/receipts" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
             View all
           </Link>
-        </CardHeader>
-        <CardContent>
-          {!recentReceipts?.length ? (
-            <div className="py-6 text-center space-y-3">
-              <Receipt className="h-8 w-8 mx-auto text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">No receipts scanned yet.</p>
-              <Link href="/scan" className={buttonVariants({ size: 'sm' })}>
-                Scan your first receipt
-              </Link>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {recentReceipts.map(r => (
-                <div key={r.id} className="flex items-center justify-between py-2.5">
-                  <div>
-                    <p className="text-sm font-medium">{r.store_name || 'Unknown store'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(r.receipt_date + 'T00:00:00'), 'MMM d, yyyy')}
-                    </p>
+        </div>
+        <Card>
+          <CardContent className="py-0">
+            {!recentReceipts?.length ? (
+              <div className="py-10 text-center space-y-3">
+                <Receipt className="h-8 w-8 mx-auto text-muted-foreground/40" strokeWidth={1.5} />
+                <p className="text-sm text-muted-foreground">No receipts scanned yet.</p>
+                <Link href="/scan" className={buttonVariants({ size: 'sm' })}>
+                  Scan your first receipt
+                </Link>
+              </div>
+            ) : (
+              <div>
+                {recentReceipts.map((r, i) => (
+                  <div
+                    key={r.id}
+                    className={cn(
+                      'flex items-center justify-between py-3.5 px-0',
+                      i > 0 && 'border-t-2 border-border/15'
+                    )}
+                  >
+                    <div>
+                      <p className="font-heading font-semibold text-sm">{r.store_name || 'Unknown store'}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {format(new Date(r.receipt_date + 'T00:00:00'), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                    <p className="font-heading font-bold text-base">${Number(r.total_amount ?? 0).toFixed(2)}</p>
                   </div>
-                  <p className="text-sm font-semibold">${Number(r.total_amount ?? 0).toFixed(2)}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
