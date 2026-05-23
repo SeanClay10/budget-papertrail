@@ -1,6 +1,6 @@
 # Budget Papertrail
 
-A mobile-first budgeting app that uses AI to read and categorize store receipts. Photograph a receipt, review the AI-parsed line items, assign categories, and watch your monthly budget update in real time.
+A budgeting app that uses AI to read and categorize store receipts. Photograph a receipt, review the AI-parsed line items, assign categories, and watch your monthly budget update in real time.
 
 **Live:** https://budget-papertrail.vercel.app
 
@@ -9,31 +9,31 @@ A mobile-first budgeting app that uses AI to read and categorize store receipts.
 ## UI
 
 <p align="center">
-  <img src="public/screenshots/login.png" alt="Login page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/login.png" alt="Login page" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/dashboard.png" alt="Budget dashboard" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/dashboard.png" alt="Budget dashboard" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/dark-mode.png" alt="Dashboard in dark mode" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/dark-mode.png" alt="Dashboard in dark mode" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/scan.png" alt="Scan receipt page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/scan.png" alt="Scan receipt page" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/review.png" alt="Item review table" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/review.png" alt="Item review table" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/receipts.png" alt="Receipts history page" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/receipts.png" alt="Receipts history page" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/settings.png" alt="Budget categories settings" width="800" style="border: 1px solid #1E293B; border-radius: 8px;" />
+  <img src="public/screenshots/settings.png" alt="Budget categories settings" width="680" style="border: 1px solid #1E293B; border-radius: 8px;" />
 </p>
 
 ---
