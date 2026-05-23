@@ -1,10 +1,21 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Outfit, Plus_Jakarta_Sans } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
+const outfit = Outfit({
+  variable: '--font-heading',
+  subsets: ['latin'],
+  weight: ['700', '800'],
+  display: 'swap',
+})
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-body',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Budget Papertrail',
@@ -22,13 +33,17 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#6366f1',
+  themeColor: '#7C3AED',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full bg-background text-foreground antialiased">
+    <html
+      lang="en"
+      className={`${outfit.variable} ${jakarta.variable} h-full`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-full">
         <ThemeProvider>
           {children}
         </ThemeProvider>
