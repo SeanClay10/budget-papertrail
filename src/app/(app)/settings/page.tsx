@@ -110,6 +110,7 @@ export default function SettingsPage() {
       </div>
 
       <CategoryForm
+        key={editing?.id ?? 'new'}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSaved={loadCategories}
