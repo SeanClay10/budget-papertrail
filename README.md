@@ -1,21 +1,47 @@
 # Budget Papertrail
 
-A mobile-first budgeting app that uses AI to scan and categorize store receipts. Photograph a receipt, review the AI-parsed line items, assign categories, and watch your monthly budget update in real time.
+A mobile-first budgeting app that uses AI to read and categorize store receipts. Photograph a receipt, review the AI-parsed line items, assign categories, and watch your monthly budget update in real time.
 
 **Live:** https://budget-papertrail.vercel.app
 
 ---
 
+## Screenshots
+
+### Login
+<img src="public/screenshots/login.png" alt="Login page" width="420" />
+
+### Dashboard
+<img src="public/screenshots/dashboard.png" alt="Budget dashboard" width="900" />
+
+### Dashboard — Dark Mode
+<img src="public/screenshots/dark-mode.png" alt="Dashboard in dark mode" width="900" />
+
+### Scan a Receipt
+<img src="public/screenshots/scan.png" alt="Scan receipt page" width="420" />
+
+### Review & Edit Items
+<img src="public/screenshots/review.png" alt="Item review table" width="600" />
+
+### Receipt History
+<img src="public/screenshots/receipts.png" alt="Receipts history page" width="900" />
+
+### Budget Categories
+<img src="public/screenshots/settings.png" alt="Settings — budget categories" width="600" />
+
+---
+
 ## Features
 
-- 📸 **Scan receipts** — take a photo directly from your phone or upload from your desktop
-- 🤖 **AI categorization** — Claude Vision reads each line item and suggests a budget category
+- 📸 **Receipt scanning** — take a photo directly from your phone or upload from desktop
+- 🤖 **Claude Vision AI** — reads every line item and suggests a budget category automatically
 - ✏️ **Review before saving** — edit item names, prices, and categories before anything hits your budget
-- 📊 **Monthly dashboard** — progress bars per category, donut chart breakdown, navigate between months
+- 📊 **Monthly dashboard** — progress bars per category with green/amber/red status, donut chart breakdown, and ← → month navigation
+- 📈 **6-month spending history** — stacked bar chart showing trends across the last 6 months
 - 🗂️ **Receipt history** — view, edit, or delete past receipts with full line-item detail
 - ⚙️ **Custom categories** — create your own categories with custom icons, colors, and monthly limits
-- 🌙 **Dark mode** — follows your system preference, toggleable manually
-- 📱 **PWA** — installable to your phone home screen
+- 🌙 **Dark mode** — follows system preference, togglable manually
+- 📱 **PWA** — installable to your phone home screen, camera works natively on mobile
 
 ---
 
@@ -24,11 +50,12 @@ A mobile-first budgeting app that uses AI to scan and categorize store receipts.
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 16 (App Router) |
-| Styling | Tailwind CSS + shadcn/ui v4 |
-| Database + Auth | Supabase |
+| Styling | Tailwind CSS v4 + shadcn/ui v4 |
+| Database + Auth | Supabase (PostgreSQL + Row Level Security) |
 | File Storage | Supabase Storage |
 | Receipt OCR | Claude Vision API (`claude-sonnet-4-6`) |
 | Charts | Recharts |
+| Fonts | Outfit + Plus Jakarta Sans |
 | Hosting | Vercel |
 
 ---
@@ -46,8 +73,8 @@ npm install
 ### 2. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run `supabase-setup.sql` in the Supabase SQL Editor
-3. Go to **Authentication → Providers → Email** → enable the Email provider, disable Sign Ups
+2. Run `supabase-setup.sql` in the Supabase **SQL Editor**
+3. Go to **Authentication → Providers → Email** → enable Email provider, disable Sign Ups
 4. Go to **Authentication → URL Configuration** → add `http://localhost:3000/auth/callback` to Redirect URLs
 
 ### 3. Environment variables
@@ -73,10 +100,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deployment
 
-Hosted on Vercel. Every push to `master` triggers an automatic redeployment.
+Hosted on Vercel — every push to `master` triggers an automatic redeployment.
 
 To deploy your own instance:
-1. Import the repo into [Vercel](https://vercel.com)
+1. Import the repo at [vercel.com](https://vercel.com)
 2. Add the four environment variables in the Vercel dashboard
 3. Add your Vercel URL to Supabase's redirect allowlist: `https://your-app.vercel.app/auth/callback`
 
