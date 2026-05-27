@@ -23,7 +23,7 @@ export function ReceiptThumbnail({ imageUrl, storeName, receiptDate }: ReceiptTh
     return (
       <div
         className={cn(
-          'shrink-0 w-16 h-16 rounded-xl border-2 border-border',
+          'shrink-0 w-14 h-14 rounded-xl border-2 border-border',
           'bg-muted flex items-center justify-center',
           'shadow-[var(--shadow-hard-sm)]',
         )}
@@ -40,7 +40,7 @@ export function ReceiptThumbnail({ imageUrl, storeName, receiptDate }: ReceiptTh
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          'group shrink-0 relative w-16 h-16 rounded-xl border-2 border-border overflow-hidden',
+          'group shrink-0 relative w-14 h-14 rounded-xl border-2 border-border overflow-hidden',
           'shadow-[var(--shadow-hard-sm)]',
           'transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
           'hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_var(--border)]',
@@ -54,7 +54,7 @@ export function ReceiptThumbnail({ imageUrl, storeName, receiptDate }: ReceiptTh
           alt={storeName ?? 'Receipt photo'}
           fill
           className="object-cover"
-          sizes="64px"
+          sizes="56px"
         />
         {/* Hover overlay — signals it's interactive */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-150 flex items-center justify-center">
