@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ReceiptScanner } from '@/components/receipt-scanner'
 import { ItemReviewTable } from '@/components/item-review-table'
 import { createClient } from '@/lib/supabase/client'
@@ -15,7 +15,9 @@ import { SCAN_FREE_LIMIT } from '@/lib/stripe'
 type Step = 'upload' | 'review' | 'saved'
 
 export default function ScanPage() {
-  const supabase = createClient()
+  // Memoize to prevent a new client instance on every render, which would
+  // cause useCallback → useEffect to re-run and race against the scan update.
+  const supabase = useMemo(() => createClient(), [])
   const [step, setStep] = useState<Step>('upload')
   const [scanning, setScanning] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -51,7 +53,7 @@ export default function ScanPage() {
       const fd = new FormData()
       fd.append('image', file)
       const res = await fetch('/api/scan', { method: 'POST', body: fd })
-      const data: (ScanResult & { error?: string; scans_used?: number }) = await res.json()
+      const data: (ScanResult & { error?: string; scans_used?: number; new_scans_used?: number }) = await res.json()
 
       if (res.status === 402 && data.error === 'scan_limit_reached') {
         setLimitReached(true)
@@ -60,9 +62,11 @@ export default function ScanPage() {
 
       if (!res.ok) throw new Error(data.error ?? 'Scan failed')
 
-      // Refresh profile so scan count updates in the UI
-      const { data: updatedProfile } = await supabase.from('user_profiles').select('*').single()
-      if (updatedProfile) setProfile(updatedProfile)
+      // Update scan count directly from the API response — avoids a separate
+      // Supabase round-trip and the race condition it could cause.
+      if (typeof data.new_scans_used === 'number') {
+        setProfile(prev => prev ? { ...prev, scans_used: data.new_scans_used as number } : prev)
+      }
 
       setImageUrl(data.image_url)
       setStoreName(data.store_name ?? '')

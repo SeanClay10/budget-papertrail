@@ -211,6 +211,12 @@ export default async function DashboardPage({
           <SectionTitle>{format(selectedDate, 'MMMM yyyy')} Breakdown</SectionTitle>
           <Card>
             <CardContent className="py-4">
+              <div className="flex items-start justify-between px-1 mb-1">
+                <div>
+                  <p className="text-[11px] uppercase tracking-widest font-heading font-bold text-muted-foreground">Total Spent</p>
+                  <p className="font-heading font-extrabold text-2xl">${totalSpent.toFixed(2)}</p>
+                </div>
+              </div>
               <SpendingChart categories={categoriesWithSpending} />
             </CardContent>
           </Card>

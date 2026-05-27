@@ -129,14 +129,19 @@ Skip tax lines, totals, subtotals, and payment lines — only include purchased 
 
     // ── Increment scan counter (for non-grandfathered, regardless of subscription) ──
     // We always track scans_used for visibility; the quota gate above handles access.
+    const newScansUsed = scansUsed + 1
     if (!profile?.is_grandfathered) {
-      await supabaseAdmin
+      const { error: updateError } = await supabaseAdmin
         .from('user_profiles')
         .update({
-          scans_used: scansUsed + 1,
+          scans_used: newScansUsed,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id)
+
+      if (updateError) {
+        console.error('Failed to increment scan count:', updateError)
+      }
     }
 
     return NextResponse.json({
@@ -150,6 +155,8 @@ Skip tax lines, totals, subtotals, and payment lines — only include purchased 
         included: true,
         category_id: null,
       })),
+      // Return new scan count so client can update without an extra round-trip
+      new_scans_used: profile?.is_grandfathered ? null : newScansUsed,
     })
   } catch (err) {
     console.error('Scan error:', err)
