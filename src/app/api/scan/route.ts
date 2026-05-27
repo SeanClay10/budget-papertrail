@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // ── Quota check ────────────────────────────────────────────────────────────
-    const supabaseAdmin = await createServiceClient()
+    const supabaseAdmin = createServiceClient()
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('scans_used, is_grandfathered, subscription_status, subscription_period_end')

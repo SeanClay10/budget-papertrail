@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
-  const supabaseAdmin = await createServiceClient()
+  const supabaseAdmin = createServiceClient()
 
   try {
     switch (event.type) {

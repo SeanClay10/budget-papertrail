@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const supabaseAdmin = await createServiceClient()
+    const supabaseAdmin = createServiceClient()
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('stripe_customer_id')
