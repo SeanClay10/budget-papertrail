@@ -12,13 +12,32 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Fetch image_url before deleting so we can clean up storage
+    const { data: receipt } = await supabase
+      .from('receipts')
+      .select('image_url')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    // Delete the DB row (cascades to receipt_items)
     const { error } = await supabase
       .from('receipts')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id) // RLS double-check
+      .eq('user_id', user.id)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Delete the photo from Storage if one was uploaded
+    if (receipt?.image_url) {
+      // URL format: .../storage/v1/object/public/receipts/{user_id}/{filename}
+      const match = receipt.image_url.match(/\/storage\/v1\/object\/public\/receipts\/(.+)/)
+      if (match?.[1]) {
+        await supabase.storage.from('receipts').remove([match[1]])
+      }
+    }
+
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Delete receipt error:', err)
