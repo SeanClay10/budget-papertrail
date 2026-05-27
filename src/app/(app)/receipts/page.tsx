@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Receipt, ScanLine } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { ReceiptActions } from '@/components/receipt-actions'
+import { ReceiptThumbnail } from '@/components/receipt-thumbnail'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -65,24 +66,31 @@ export default async function ReceiptsPage() {
                 <div className="h-1.5" style={{ backgroundColor: accentColor }} />
 
                 <div className="p-4">
-                  {/* Header row */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-heading font-bold text-base">{receipt.store_name || 'Unknown store'}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {format(new Date(receipt.receipt_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-2">
-                      <div className="text-right">
-                        <p className="font-heading font-bold text-lg">${Number(receipt.total_amount ?? 0).toFixed(2)}</p>
-                        <p className="text-[10px] text-muted-foreground">{items.length} items</p>
+                  {/* Header row: [thumbnail] [store/date ── amount/actions] */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <ReceiptThumbnail
+                      imageUrl={receipt.image_url}
+                      storeName={receipt.store_name}
+                      receiptDate={receipt.receipt_date}
+                    />
+                    <div className="flex-1 flex items-start justify-between min-w-0">
+                      <div className="min-w-0">
+                        <p className="font-heading font-bold text-base truncate">{receipt.store_name || 'Unknown store'}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {format(new Date(receipt.receipt_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
+                        </p>
                       </div>
-                      <ReceiptActions receipt={{
-                        id: receipt.id, store_name: receipt.store_name,
-                        receipt_date: receipt.receipt_date,
-                        items: items.map(i => ({ id: i.id, name: i.name, price: Number(i.price), category_id: i.category_id })),
-                      }} />
+                      <div className="flex items-center gap-2 ml-2 shrink-0">
+                        <div className="text-right">
+                          <p className="font-heading font-bold text-lg">${Number(receipt.total_amount ?? 0).toFixed(2)}</p>
+                          <p className="text-[10px] text-muted-foreground">{items.length} items</p>
+                        </div>
+                        <ReceiptActions receipt={{
+                          id: receipt.id, store_name: receipt.store_name,
+                          receipt_date: receipt.receipt_date,
+                          items: items.map(i => ({ id: i.id, name: i.name, price: Number(i.price), category_id: i.category_id })),
+                        }} />
+                      </div>
                     </div>
                   </div>
 
