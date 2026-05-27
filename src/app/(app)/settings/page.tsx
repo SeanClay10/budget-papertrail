@@ -265,7 +265,7 @@ export default function SettingsPage() {
                 <div className="rounded-xl border-2 border-primary/30 bg-primary/5 px-4 py-4 space-y-3">
                   <div>
                     <p className="font-heading font-bold text-sm">Upgrade to Pro — $5/month</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">Unlimited receipt scanning with AI-powered item extraction.</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Unlimited receipt scanning with AI-powered system.</p>
                   </div>
                   <button
                     onClick={handleUpgrade}
