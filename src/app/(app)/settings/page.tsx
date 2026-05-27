@@ -137,7 +137,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="font-heading font-bold">Legacy Account</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Unlimited scans — you&apos;re grandfathered in. No subscription needed.</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Unlimited scans . No subscription needed.</p>
                 </div>
               </div>
             ) : isActiveSubscription ? (
