@@ -120,7 +120,7 @@ export default function ScanPage() {
       new Date(profile.subscription_period_end) > new Date())
   const scansUsed = profile?.scans_used ?? 0
   const scansLeft = Math.max(0, SCAN_FREE_LIMIT - scansUsed)
-  const showQuotaBanner = !isGrandfathered && !isSubscribed
+  const showQuotaBanner = profile !== null && !isGrandfathered && !isSubscribed
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto w-full space-y-5">
