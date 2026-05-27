@@ -1,12 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { anthropic, RECEIPT_SYSTEM_PROMPT, DEFAULT_CATEGORIES } from '@/lib/anthropic'
+import { SCAN_FREE_LIMIT } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // ── Quota check ────────────────────────────────────────────────────────────
+    const supabaseAdmin = await createServiceClient()
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('scans_used, is_grandfathered, subscription_status, subscription_period_end')
+      .eq('user_id', user.id)
+      .single()
+
+    // If the profile row doesn't exist yet (race condition on first ever request),
+    // create it now so subsequent logic works correctly.
+    if (!profile) {
+      await supabaseAdmin
+        .from('user_profiles')
+        .insert({ user_id: user.id, is_grandfathered: false })
+        .select()
+        .single()
+    }
+
+    const scansUsed = profile?.scans_used ?? 0
+
+    // A cancelled subscription is still valid until the period ends
+    const isSubscriptionActive =
+      profile?.subscription_status === 'active' ||
+      (profile?.subscription_status === 'cancelled' &&
+        !!profile.subscription_period_end &&
+        new Date(profile.subscription_period_end) > new Date())
+
+    const canScan =
+      profile?.is_grandfathered ||
+      isSubscriptionActive ||
+      scansUsed < SCAN_FREE_LIMIT
+
+    if (!canScan) {
+      return NextResponse.json(
+        { error: 'scan_limit_reached', scans_used: scansUsed },
+        { status: 402 }
+      )
+    }
+    // ── End quota check ────────────────────────────────────────────────────────
 
     const formData = await request.formData()
     const file = formData.get('image') as File | null
@@ -85,6 +126,18 @@ Skip tax lines, totals, subtotals, and payment lines — only include purchased 
     }
 
     const parsed = JSON.parse(jsonMatch[0])
+
+    // ── Increment scan counter (for non-grandfathered, regardless of subscription) ──
+    // We always track scans_used for visibility; the quota gate above handles access.
+    if (!profile?.is_grandfathered) {
+      await supabaseAdmin
+        .from('user_profiles')
+        .update({
+          scans_used: scansUsed + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id)
+    }
 
     return NextResponse.json({
       image_url: publicUrl,

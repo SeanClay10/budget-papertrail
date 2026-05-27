@@ -81,10 +81,20 @@ npm install
 
 1. Create a project at [supabase.com](https://supabase.com)
 2. Run `supabase-setup.sql` in the Supabase **SQL Editor**
-3. Go to **Authentication → Providers → Email** → enable Email provider, disable Sign Ups
-4. Go to **Authentication → URL Configuration** → add `http://localhost:3000/auth/callback` to Redirect URLs
+3. Run `supabase-billing-migration.sql` in the Supabase **SQL Editor** (adds the `user_profiles` table)
+4. Go to **Authentication → Providers → Email** → enable Email provider, **enable Sign Ups**, enable Confirm Email
+5. Go to **Authentication → URL Configuration** → set Site URL to your app URL, add `http://localhost:3000/auth/callback` to Redirect URLs
 
-### 3. Environment variables
+### 3. Set up Stripe
+
+1. Create an account at [stripe.com](https://stripe.com)
+2. Create a **Product** named "Budget Papertrail Pro"
+3. Add a **Price**: $5.00 / month recurring → copy the `price_...` ID
+4. Create a **Webhook** endpoint at `https://your-app.vercel.app/api/stripe/webhook`
+   - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
+5. Configure the **Customer Portal** at [billing.stripe.com/p/login/...](https://dashboard.stripe.com/test/settings/billing/portal) so subscribers can manage/cancel
+
+### 4. Environment variables
 
 Create `.env.local` in the project root:
 
@@ -93,15 +103,20 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
+
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 4. Run
+### 5. Run
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). New users can sign up at `/signup`.
 
 ---
 
@@ -111,14 +126,20 @@ Hosted on Vercel — every push to `master` triggers an automatic redeployment.
 
 To deploy your own instance:
 1. Import the repo at [vercel.com](https://vercel.com)
-2. Add the four environment variables in the Vercel dashboard
+2. Add all environment variables in the Vercel dashboard (set `NEXT_PUBLIC_APP_URL` to your Vercel URL)
 3. Add your Vercel URL to Supabase's redirect allowlist: `https://your-app.vercel.app/auth/callback`
 
 ---
 
-## Access
+## Access & Billing
 
-Sign up is disabled — accounts are created manually via the Supabase dashboard under **Authentication → Users → Add User**.
+New users sign up at `/signup` with email and password. A confirmation email is sent before they can log in.
+
+**Free plan**: 10 lifetime receipt scans (AI-powered). Manual entry is always unlimited.
+
+**Pro plan**: $5/month via Stripe for unlimited scans. Users upgrade from the Scan page or Settings → Billing.
+
+Existing accounts created before this feature launched are grandfathered as unlimited.
 
 ---
 
@@ -126,6 +147,7 @@ Sign up is disabled — accounts are created manually via the Supabase dashboard
 
 | Table | Purpose |
 |---|---|
+| `user_profiles` | Per-user scan count, subscription status, and Stripe IDs |
 | `budget_categories` | User-defined categories with monthly limits |
 | `receipts` | One row per scanned receipt |
 | `receipt_items` | Line items linked to receipts and categories |

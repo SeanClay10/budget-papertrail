@@ -1,8 +1,46 @@
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
+export type SubscriptionStatus = 'free' | 'active' | 'past_due' | 'cancelled'
+
 export interface Database {
   public: {
     Tables: {
+      user_profiles: {
+        Row: {
+          user_id: string
+          scans_used: number
+          is_grandfathered: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: SubscriptionStatus
+          subscription_period_end: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          scans_used?: number
+          is_grandfathered?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: SubscriptionStatus
+          subscription_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          scans_used?: number
+          is_grandfathered?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: SubscriptionStatus
+          subscription_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       budget_categories: {
         Row: {
           id: string
@@ -116,6 +154,7 @@ export interface Database {
   }
 }
 
+export type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 export type BudgetCategory = Database['public']['Tables']['budget_categories']['Row']
 export type Receipt = Database['public']['Tables']['receipts']['Row']
 export type ReceiptItem = Database['public']['Tables']['receipt_items']['Row']
