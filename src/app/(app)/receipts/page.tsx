@@ -20,6 +20,19 @@ export default async function ReceiptsPage() {
     .eq('user_id', user!.id)
     .order('receipt_date', { ascending: false })
 
+  // The storage bucket is private — generate 1-hour signed URLs server-side.
+  // Stored image_url is a public-path URL; extract the storage path from it.
+  const signedImageUrls: Record<string, string> = {}
+  await Promise.all(
+    (receipts ?? []).map(async r => {
+      if (!r.image_url) return
+      const path = r.image_url.match(/\/storage\/v1\/object\/(?:public|sign)\/receipts\/(.+?)(?:\?.*)?$/)?.[1]
+      if (!path) return
+      const { data } = await supabase.storage.from('receipts').createSignedUrl(path, 3600)
+      if (data?.signedUrl) signedImageUrls[r.id] = data.signedUrl
+    })
+  )
+
   type ItemRow = {
     id: string; name: string; price: number; category_id: string | null
     budget_categories: { name: string; color: string; icon: string } | null
@@ -69,7 +82,7 @@ export default async function ReceiptsPage() {
                   {/* Header row: [thumbnail] [store/date ── amount/actions] */}
                   <div className="flex items-start gap-3 mb-3">
                     <ReceiptThumbnail
-                      imageUrl={receipt.image_url}
+                      imageUrl={signedImageUrls[receipt.id] ?? null}
                       storeName={receipt.store_name}
                       receiptDate={receipt.receipt_date}
                     />
