@@ -110,7 +110,7 @@ export default async function ReceiptsPage() {
 
                   {/* Line items */}
                   {items.length > 0 && (
-                    <div className="space-y-1.5 border-t-2 border-border/20 pt-3">
+                    <div className="space-y-1.5 border-t-2 border-border/20 pt-3 pb-2">
                       {items.map((item: ItemRow) => (
                         <div key={item.id} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2 min-w-0">
