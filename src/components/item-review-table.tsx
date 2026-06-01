@@ -16,16 +16,18 @@ interface ItemReviewTableProps {
   categories: BudgetCategory[]
   storeName: string
   receiptDate: string
+  notes: string
   onStoreNameChange: (v: string) => void
   onReceiptDateChange: (v: string) => void
+  onNotesChange: (v: string) => void
   onItemsChange: (items: ScannedItem[]) => void
   onSave: () => void
   saving: boolean
 }
 
 export function ItemReviewTable({
-  items, categories, storeName, receiptDate,
-  onStoreNameChange, onReceiptDateChange, onItemsChange, onSave, saving,
+  items, categories, storeName, receiptDate, notes,
+  onStoreNameChange, onReceiptDateChange, onNotesChange, onItemsChange, onSave, saving,
 }: ItemReviewTableProps) {
   const [newItemName, setNewItemName] = useState('')
   const [newItemPrice, setNewItemPrice] = useState('')
@@ -67,6 +69,26 @@ export function ItemReviewTable({
           <label className={labelClass}>Date</label>
           <Input type="date" value={receiptDate} onChange={e => onReceiptDateChange(e.target.value)} />
         </div>
+      </div>
+
+      {/* Note */}
+      <div>
+        <label className={labelClass}>
+          Note <span className="normal-case font-normal tracking-normal">(optional)</span>
+        </label>
+        <textarea
+          value={notes}
+          onChange={e => onNotesChange(e.target.value)}
+          placeholder="Add a note…"
+          rows={2}
+          className={cn(
+            'w-full min-w-0 rounded-xl px-3 py-2 text-sm resize-none',
+            'bg-card text-foreground placeholder:text-muted-foreground',
+            'border-2 transition-all duration-200 outline-none',
+            'border-[var(--input-border)]',
+            'focus-visible:border-primary focus-visible:shadow-[4px_4px_0px_0px_var(--primary)]',
+          )}
+        />
       </div>
 
       {/* Items */}

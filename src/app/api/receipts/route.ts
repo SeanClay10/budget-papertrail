@@ -9,10 +9,11 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { store_name, receipt_date, image_url, items } = body as {
+    const { store_name, receipt_date, image_url, notes, items } = body as {
       store_name: string
       receipt_date: string
       image_url: string
+      notes: string | null
       items: ScannedItem[]
     }
 
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
         receipt_date,
         total_amount: Math.round(total * 100) / 100,
         image_url: image_url || null,
+        notes: notes || null,
       })
       .select()
       .single()

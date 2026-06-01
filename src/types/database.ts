@@ -79,6 +79,7 @@ export interface Database {
           receipt_date: string
           total_amount: number | null
           image_url: string | null
+          notes: string | null
           created_at: string
         }
         Insert: {
@@ -88,6 +89,7 @@ export interface Database {
           receipt_date?: string
           total_amount?: number | null
           image_url?: string | null
+          notes?: string | null
           created_at?: string
         }
         Update: {
@@ -97,6 +99,7 @@ export interface Database {
           receipt_date?: string
           total_amount?: number | null
           image_url?: string | null
+          notes?: string | null
           created_at?: string
         }
         Relationships: []

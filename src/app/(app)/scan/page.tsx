@@ -29,6 +29,7 @@ export default function ScanPage() {
   const [imageUrl, setImageUrl] = useState('')
   const [storeName, setStoreName] = useState('')
   const [receiptDate, setReceiptDate] = useState(new Date().toISOString().slice(0, 10))
+  const [notes, setNotes] = useState('')
   const [items, setItems] = useState<ScannedItem[]>([])
 
   const loadData = useCallback(async () => {
@@ -44,7 +45,7 @@ export default function ScanPage() {
 
   function handleAddManually() {
     setImageUrl(''); setStoreName(''); setReceiptDate(new Date().toISOString().slice(0, 10))
-    setItems([]); setError(null); setLimitReached(false); setStep('review')
+    setNotes(''); setItems([]); setError(null); setLimitReached(false); setStep('review')
   }
 
   async function handleScan(file: File) {
@@ -87,7 +88,7 @@ export default function ScanPage() {
       const res = await fetch('/api/receipts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ store_name: storeName, receipt_date: receiptDate, image_url: imageUrl, items }),
+        body: JSON.stringify({ store_name: storeName, receipt_date: receiptDate, image_url: imageUrl, notes: notes || null, items }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Save failed')
@@ -99,7 +100,7 @@ export default function ScanPage() {
 
   function handleReset() {
     setStep('upload'); setItems([]); setImageUrl(''); setStoreName('')
-    setReceiptDate(new Date().toISOString().slice(0, 10)); setError(null); setLimitReached(false)
+    setReceiptDate(new Date().toISOString().slice(0, 10)); setNotes(''); setError(null); setLimitReached(false)
   }
 
   async function handleUpgrade() {
@@ -221,8 +222,8 @@ export default function ScanPage() {
 
       {step === 'review' && (
         <ItemReviewTable
-          items={items} categories={categories} storeName={storeName} receiptDate={receiptDate}
-          onStoreNameChange={setStoreName} onReceiptDateChange={setReceiptDate}
+          items={items} categories={categories} storeName={storeName} receiptDate={receiptDate} notes={notes}
+          onStoreNameChange={setStoreName} onReceiptDateChange={setReceiptDate} onNotesChange={setNotes}
           onItemsChange={setItems} onSave={handleSave} saving={saving}
         />
       )}

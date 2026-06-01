@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
-import { Receipt, ScanLine } from 'lucide-react'
+import { Receipt, ScanLine, MessageSquare } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { ReceiptActions } from '@/components/receipt-actions'
 import { ReceiptThumbnail } from '@/components/receipt-thumbnail'
@@ -101,6 +101,7 @@ export default async function ReceiptsPage() {
                         <ReceiptActions receipt={{
                           id: receipt.id, store_name: receipt.store_name,
                           receipt_date: receipt.receipt_date,
+                          notes: receipt.notes ?? null,
                           items: items.map(i => ({ id: i.id, name: i.name, price: Number(i.price), category_id: i.category_id })),
                         }} />
                       </div>
@@ -130,6 +131,14 @@ export default async function ReceiptsPage() {
                           <span className="font-heading font-bold ml-2 shrink-0">${Number(item.price).toFixed(2)}</span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Note */}
+                  {receipt.notes && (
+                    <div className="flex items-start gap-2 border-t-2 border-border/20 pt-3">
+                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0 mt-0.5" strokeWidth={2} />
+                      <p className="text-xs text-muted-foreground">{receipt.notes}</p>
                     </div>
                   )}
                 </div>

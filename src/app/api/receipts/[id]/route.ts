@@ -56,9 +56,10 @@ export async function PUT(
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { store_name, receipt_date, items } = body as {
+    const { store_name, receipt_date, notes, items } = body as {
       store_name: string
       receipt_date: string
+      notes: string | null
       items: ScannedItem[]
     }
 
@@ -68,7 +69,7 @@ export async function PUT(
     // Update the receipt header
     const { error: receiptError } = await supabase
       .from('receipts')
-      .update({ store_name: store_name || null, receipt_date, total_amount: total })
+      .update({ store_name: store_name || null, receipt_date, total_amount: total, notes: notes || null })
       .eq('id', id)
       .eq('user_id', user.id)
 

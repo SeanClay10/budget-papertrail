@@ -15,6 +15,7 @@ export interface ReceiptForActions {
   id: string
   store_name: string | null
   receipt_date: string
+  notes: string | null
   items: { id: string; name: string; price: number; category_id: string | null }[]
 }
 
@@ -28,6 +29,7 @@ export function ReceiptActions({ receipt }: { receipt: ReceiptForActions }) {
   const [categories, setCategories] = useState<BudgetCategory[]>([])
   const [storeName, setStoreName] = useState(receipt.store_name ?? '')
   const [receiptDate, setReceiptDate] = useState(receipt.receipt_date)
+  const [notes, setNotes] = useState(receipt.notes ?? '')
   const [items, setItems] = useState<ScannedItem[]>([])
 
   const loadCategories = useCallback(async () => {
@@ -40,6 +42,7 @@ export function ReceiptActions({ receipt }: { receipt: ReceiptForActions }) {
       loadCategories()
       setStoreName(receipt.store_name ?? '')
       setReceiptDate(receipt.receipt_date)
+      setNotes(receipt.notes ?? '')
       setItems(receipt.items.map(item => ({
         name: item.name, price: item.price, category_id: item.category_id,
         suggested_category: '', included: true,
@@ -60,7 +63,7 @@ export function ReceiptActions({ receipt }: { receipt: ReceiptForActions }) {
     const res = await fetch(`/api/receipts/${receipt.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ store_name: storeName, receipt_date: receiptDate, items }),
+      body: JSON.stringify({ store_name: storeName, receipt_date: receiptDate, notes: notes || null, items }),
     })
     if (res.ok) { setEditOpen(false); router.refresh() } else {
       const data = await res.json()
@@ -105,8 +108,8 @@ export function ReceiptActions({ receipt }: { receipt: ReceiptForActions }) {
           </DialogHeader>
           {error && <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-xl">{error}</p>}
           <ItemReviewTable
-            items={items} categories={categories} storeName={storeName} receiptDate={receiptDate}
-            onStoreNameChange={setStoreName} onReceiptDateChange={setReceiptDate}
+            items={items} categories={categories} storeName={storeName} receiptDate={receiptDate} notes={notes}
+            onStoreNameChange={setStoreName} onReceiptDateChange={setReceiptDate} onNotesChange={setNotes}
             onItemsChange={setItems} onSave={handleSave} saving={saving}
           />
         </DialogContent>
