@@ -9,7 +9,7 @@ export interface Database {
         Row: {
           user_id: string
           scans_used: number
-          is_grandfathered: boolean
+          is_admin: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: SubscriptionStatus
@@ -20,7 +20,7 @@ export interface Database {
         Insert: {
           user_id: string
           scans_used?: number
-          is_grandfathered?: boolean
+          is_admin?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: SubscriptionStatus
@@ -31,7 +31,7 @@ export interface Database {
         Update: {
           user_id?: string
           scans_used?: number
-          is_grandfathered?: boolean
+          is_admin?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: SubscriptionStatus

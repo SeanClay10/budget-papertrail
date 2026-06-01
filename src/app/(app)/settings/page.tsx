@@ -84,7 +84,7 @@ export default function SettingsPage() {
   )
 
   // ── Billing helpers ──────────────────────────────────────────────────────────
-  const isGrandfathered = profile?.is_grandfathered ?? false
+  const isAdmin = profile?.is_admin ?? false
   const status = profile?.subscription_status ?? 'free'
   const periodEnd = profile?.subscription_period_end
     ? new Date(profile.subscription_period_end)
@@ -126,8 +126,8 @@ export default function SettingsPage() {
           <div className="px-5 py-5 space-y-4">
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : isGrandfathered ? (
-              /* ── Legacy / grandfathered account ── */
+            ) : isAdmin ? (
+              /* ── Admin account ── */
               <div className="flex items-start gap-4">
                 <div
                   className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-border flex-shrink-0"
@@ -136,8 +136,8 @@ export default function SettingsPage() {
                   <Sparkles className="h-5 w-5 text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-heading font-bold">Legacy Account</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Unlimited scans . No subscription needed.</p>
+                  <p className="font-heading font-bold">Admin Account</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Unlimited scans. No subscription needed.</p>
                 </div>
               </div>
             ) : isActiveSubscription ? (

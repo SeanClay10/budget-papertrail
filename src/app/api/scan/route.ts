@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = createServiceClient()
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
-      .select('scans_used, is_grandfathered, subscription_status, subscription_period_end')
+      .select('scans_used, is_admin, subscription_status, subscription_period_end')
       .eq('user_id', user.id)
       .single()
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!profile) {
       await supabaseAdmin
         .from('user_profiles')
-        .insert({ user_id: user.id, is_grandfathered: false })
+        .insert({ user_id: user.id, is_admin: false })
         .select()
         .single()
     }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         new Date(profile.subscription_period_end) > new Date())
 
     const canScan =
-      profile?.is_grandfathered ||
+      profile?.is_admin ||
       isSubscriptionActive ||
       scansUsed < SCAN_FREE_LIMIT
 
@@ -127,10 +127,10 @@ Skip tax lines, totals, subtotals, and payment lines — only include purchased 
 
     const parsed = JSON.parse(jsonMatch[0])
 
-    // ── Increment scan counter (for non-grandfathered, regardless of subscription) ──
+    // ── Increment scan counter (for non-admin, regardless of subscription) ──
     // We always track scans_used for visibility; the quota gate above handles access.
     const newScansUsed = scansUsed + 1
-    if (!profile?.is_grandfathered) {
+    if (!profile?.is_admin) {
       const { error: updateError } = await supabaseAdmin
         .from('user_profiles')
         .update({
@@ -156,7 +156,7 @@ Skip tax lines, totals, subtotals, and payment lines — only include purchased 
         category_id: null,
       })),
       // Return new scan count so client can update without an extra round-trip
-      new_scans_used: profile?.is_grandfathered ? null : newScansUsed,
+      new_scans_used: profile?.is_admin ? null : newScansUsed,
     })
   } catch (err) {
     console.error('Scan error:', err)

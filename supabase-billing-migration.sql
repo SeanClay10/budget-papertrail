@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS public.user_profiles (
   user_id                   UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   scans_used                INTEGER NOT NULL DEFAULT 0,
-  is_grandfathered          BOOLEAN NOT NULL DEFAULT FALSE,
+  is_admin          BOOLEAN NOT NULL DEFAULT FALSE,
   stripe_customer_id        TEXT UNIQUE,
   stripe_subscription_id    TEXT UNIQUE,
   subscription_status       TEXT NOT NULL DEFAULT 'free',
@@ -31,7 +31,7 @@ CREATE POLICY "Users can read own profile"
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.user_profiles (user_id, is_grandfathered)
+  INSERT INTO public.user_profiles (user_id, is_admin)
   VALUES (NEW.id, FALSE)
   ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
@@ -43,7 +43,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5. Backfill: grandfather all existing users (unlimited scans)
-INSERT INTO public.user_profiles (user_id, is_grandfathered)
-SELECT id, TRUE FROM auth.users
+-- 5. Backfill: create profiles for all existing users (non-admin by default)
+INSERT INTO public.user_profiles (user_id, is_admin)
+SELECT id, FALSE FROM auth.users
 ON CONFLICT (user_id) DO NOTHING;
