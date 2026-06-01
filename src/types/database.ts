@@ -167,8 +167,17 @@ export interface ReceiptWithItems extends Receipt {
   receipt_items: ReceiptItemWithCategory[]
 }
 
+export interface CategoryItem {
+  id: string
+  name: string
+  price: number
+  store_name: string | null
+  receipt_date: string
+}
+
 export interface CategoryWithSpending extends BudgetCategory {
   spent: number
+  items: CategoryItem[]
 }
 
 export interface ScannedItem {

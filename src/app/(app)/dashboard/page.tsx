@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { ScanLine, Receipt } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, parseISO, subMonths } from 'date-fns'
-import type { CategoryWithSpending } from '@/types/database'
+import type { CategoryWithSpending, CategoryItem } from '@/types/database'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_CATEGORIES = [
@@ -63,33 +63,53 @@ export default async function DashboardPage({
   // ── Selected month spending ──────────────────────────────────────────────
   const { data: monthReceipts } = await supabase
     .from('receipts')
-    .select('id')
+    .select('id, store_name, receipt_date')
     .eq('user_id', user!.id)
     .gte('receipt_date', monthStart)
     .lte('receipt_date', monthEnd)
 
   const receiptIds = monthReceipts?.map(r => r.id) ?? []
 
+  const receiptInfoMap: Record<string, { store_name: string | null; receipt_date: string }> = {}
+  for (const r of monthReceipts ?? []) {
+    receiptInfoMap[r.id] = { store_name: r.store_name, receipt_date: r.receipt_date }
+  }
+
   const { data: spending } = receiptIds.length > 0
     ? await supabase
         .from('receipt_items')
-        .select('category_id, price')
+        .select('id, name, price, category_id, receipt_id')
         .in('receipt_id', receiptIds)
-    : { data: [] as { category_id: string | null; price: number }[] }
+    : { data: [] as { id: string; name: string; price: number; category_id: string | null; receipt_id: string }[] }
 
   const spendingMap: Record<string, number> = {}
+  const categoryItemsMap: Record<string, CategoryItem[]> = {}
   let uncategorizedTotal = 0
   for (const item of spending ?? []) {
+    const info = receiptInfoMap[item.receipt_id]
+    const categoryItem: CategoryItem = {
+      id: item.id,
+      name: item.name,
+      price: Number(item.price),
+      store_name: info?.store_name ?? null,
+      receipt_date: info?.receipt_date ?? '',
+    }
     if (item.category_id) {
       spendingMap[item.category_id] = (spendingMap[item.category_id] ?? 0) + Number(item.price)
+      ;(categoryItemsMap[item.category_id] ??= []).push(categoryItem)
     } else {
       uncategorizedTotal += Number(item.price)
+      ;(categoryItemsMap['__uncategorized__'] ??= []).push(categoryItem)
     }
   }
+
+  const byDateDesc = (a: CategoryItem, b: CategoryItem) =>
+    b.receipt_date.localeCompare(a.receipt_date)
 
   const categoriesWithSpending: CategoryWithSpending[] = (categories ?? []).map(c => ({
     ...c,
     spent: Math.round((spendingMap[c.id] ?? 0) * 100) / 100,
+    items: (categoryItemsMap[c.id] ?? []).sort(byDateDesc),
   }))
 
   if (uncategorizedTotal > 0) {
@@ -102,6 +122,7 @@ export default async function DashboardPage({
       icon: '❓',
       created_at: '',
       spent: Math.round(uncategorizedTotal * 100) / 100,
+      items: (categoryItemsMap['__uncategorized__'] ?? []).sort(byDateDesc),
     })
   }
 
