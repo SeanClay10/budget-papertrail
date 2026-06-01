@@ -3,21 +3,26 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, ScanLine, Receipt, Settings, LogOut } from 'lucide-react'
+import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/theme-toggle'
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/scan',      label: 'Scan',      icon: ScanLine },
-  { href: '/receipts',  label: 'Receipts',  icon: Receipt },
-  { href: '/settings',  label: 'Settings',  icon: Settings },
-]
 
 export function Nav() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  // Compute client-side so the dashboard link always uses the browser's local month,
+  // avoiding the UTC vs. PDT mismatch that occurs on the server.
+  const dashboardHref = `/dashboard?month=${format(new Date(), 'yyyy-MM')}`
+
+  const navItems = [
+    { href: dashboardHref, base: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/scan',       base: '/scan',       label: 'Scan',      icon: ScanLine },
+    { href: '/receipts',   base: '/receipts',   label: 'Receipts',  icon: Receipt },
+    { href: '/settings',   base: '/settings',   label: 'Settings',  icon: Settings },
+  ]
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -30,7 +35,7 @@ export function Nav() {
       {/* ── Desktop Sidebar ─────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-64 min-h-screen border-r-2 border-border bg-card px-4 py-6">
         {/* Wordmark */}
-        <Link href="/dashboard" className="flex items-center gap-3 px-2 mb-8">
+        <Link href={dashboardHref} className="flex items-center gap-3 px-2 mb-8">
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary border-2 border-border shadow-[var(--shadow-hard-sm)] hover-wiggle">
             <Receipt className="h-5 w-5 text-white" strokeWidth={2.5} />
           </div>
@@ -42,11 +47,11 @@ export function Nav() {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1.5">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href
+          {navItems.map(({ href, base, label, icon: Icon }) => {
+            const isActive = pathname === base
             return (
               <Link
-                key={href}
+                key={base}
                 href={href}
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 rounded-full text-sm font-heading font-bold transition-all duration-200',
@@ -82,12 +87,12 @@ export function Nav() {
 
       {/* ── Mobile Bottom Nav ───────────────────────────────────────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t-2 border-border bg-card flex items-end">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isScan = href === '/scan'
-          const isActive = pathname === href
+        {navItems.map(({ href, base, label, icon: Icon }) => {
+          const isScan = base === '/scan'
+          const isActive = pathname === base
           return (
             <Link
-              key={href}
+              key={base}
               href={href}
               className={cn(
                 'flex-1 flex flex-col items-center justify-end pb-2 pt-2 text-[10px] font-heading font-bold relative',
