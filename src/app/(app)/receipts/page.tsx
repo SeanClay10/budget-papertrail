@@ -136,7 +136,7 @@ export default async function ReceiptsPage() {
 
                   {/* Note */}
                   {receipt.notes && (
-                    <div className="flex items-start gap-2 border-t-2 border-border/20 pt-3">
+                    <div className="flex items-start gap-2 pt-3">
                       <MessageSquare className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0 mt-0.5" strokeWidth={2} />
                       <p className="text-xs text-muted-foreground">{receipt.notes}</p>
                     </div>
